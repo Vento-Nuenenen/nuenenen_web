@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { AngularFirestore } from '@angular/fire/firestore';
-import { AngularFireStorage, AngularFireUploadTask } from '@angular/fire/storage';
+import { getDownloadURL, percentage, ref, Storage, UploadTask } from '@angular/fire/storage';
+import { uploadBytesResumable, UploadTaskSnapshot } from '@firebase/storage';
 import { Observable, of } from 'rxjs';
 import { finalize, tap } from 'rxjs/operators';
 
@@ -12,40 +12,29 @@ import { finalize, tap } from 'rxjs/operators';
 export class FileUploadTaskComponent implements OnInit {
   @Input() file!: File;
 
-  task!: AngularFireUploadTask;
+  task!: UploadTask;
 
-  percentage: Observable<number | undefined> = of(0);
+  uploadPercent$: Observable<{
+    progress: number;
+    snapshot: UploadTaskSnapshot;
+  }> = of({} as any);
   snapshot: Observable<any> = of();
   downloadURL = '';
 
-  constructor(private storage: AngularFireStorage, private db: AngularFirestore) {}
+  constructor(private storage: Storage) {}
 
   ngOnInit() {
     this.startUpload();
   }
 
-  startUpload() {
-    // The storage path
-    const path = `test/${Date.now()}_${this.file.name}`;
-
-    // Reference to storage bucket
-    const ref = this.storage.ref(path);
-
-    // The main task
-    this.task = this.storage.upload(path, this.file);
-
-    // Progress monitoring
-    this.percentage = this.task.percentageChanges();
-
-    this.snapshot = this.task.snapshotChanges().pipe(
-      tap(console.log),
-      // The file's download URL
-      finalize(async () => {
-        this.downloadURL = await ref.getDownloadURL().toPromise();
-
-        this.db.collection('files').add({ downloadURL: this.downloadURL, path });
-      })
-    );
+  async startUpload() {
+    const path = `blog_images/${Date.now()}_${this.file.name}`;
+    const storageRef = ref(this.storage, path);
+    this.task = uploadBytesResumable(storageRef, this.file);
+    this.uploadPercent$ = percentage(this.task);
+    await this.task;
+    //TODO: return url to download image later on
+    const url = await getDownloadURL(storageRef);
   }
 
   isActive(snapshot: any) {

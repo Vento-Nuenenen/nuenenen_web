@@ -10,10 +10,7 @@ import { first } from 'rxjs/operators';
 })
 export class ArticleDetailResolver implements Resolve<Article | undefined> {
   constructor(private articleService: ArticleService) {}
-  resolve(
-    route: ActivatedRouteSnapshot,
-    state: RouterStateSnapshot
-  ): Observable<Article | undefined> {
+  resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Promise<Article | undefined> {
     const id = route.paramMap.get('id') || '';
     return this.articleService.getArticle(id);
   }

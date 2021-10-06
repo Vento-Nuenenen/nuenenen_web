@@ -1,10 +1,6 @@
-import { HttpClient } from '@angular/common/http';
-import { Component, ElementRef, Input, ViewChild } from '@angular/core';
-import { AngularFireStorage } from '@angular/fire/storage';
+import { Component } from '@angular/core';
 import { NotificationType } from '@shared/models/notification-type';
 import { NotificationService } from '@shared/services/notification.service';
-import { Observable, of } from 'rxjs';
-import { finalize } from 'rxjs/operators';
 
 @Component({
   selector: 'app-file-upload',

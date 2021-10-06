@@ -10,16 +10,15 @@ import { Article } from '../../models/article';
   styleUrls: ['./article-list.component.scss'],
 })
 export class ArticleListComponent implements OnInit {
-  articles$ = of<Article[]>();
+  articles: Article[] = [];
   isFilterActive = false;
   isListView = false;
 
   constructor(private articleService: ArticleService, private router: Router) {}
 
   ngOnInit() {
-    this.articles$ = this.articleService.getArticles();
-    this.articleService.articlesChanged.subscribe((articles: Article[]) => {
-      this.articles$ = of(articles);
+    this.articleService.getArticles().subscribe((articles) => {
+      this.articles = articles;
     });
   }
 

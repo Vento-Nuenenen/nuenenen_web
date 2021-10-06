@@ -1,5 +1,12 @@
 import { Injectable } from '@angular/core';
-import { AngularFirestore, AngularFirestoreCollection } from '@angular/fire/firestore';
+import {
+  collectionData,
+  CollectionReference,
+  Firestore,
+  query,
+  where,
+} from '@angular/fire/firestore';
+import { collection } from '@firebase/firestore';
 import { Observable } from 'rxjs';
 import { Tag } from '../models/tag';
 
@@ -7,13 +14,15 @@ import { Tag } from '../models/tag';
   providedIn: 'root',
 })
 export class TagService {
-  private tagCollection: AngularFirestoreCollection<Tag>;
-
-  constructor(private afs: AngularFirestore) {
-    this.tagCollection = afs.collection<Tag>('tags');
-  }
+  constructor(private afs: Firestore) {}
 
   getTags(): Observable<Tag[]> {
-    return this.tagCollection.valueChanges();
+    return collectionData<Tag>(
+      query<Tag>(
+        collection(this.afs, 'tags') as CollectionReference<Tag>,
+        where('published', '==', true)
+      ),
+      { idField: 'id' }
+    );
   }
 }

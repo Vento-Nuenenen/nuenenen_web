@@ -17,9 +17,9 @@
     </button>
   </div>
   <div *ngIf="isFilterActive" class="mb-3">
-    <app-article-filter></app-article-filter>
+    <app-article-filter (changedArticles)="articles = $event"></app-article-filter>
   </div>
-  <div *ngIf="articles$ | async as articles">
+  <div *ngIf="articles">
     <ng-container
       *ngIf="articles.length; then detailTemplate; else fallbackTemplate"
     ></ng-container>

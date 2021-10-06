@@ -1,65 +1,79 @@
 import { Injectable } from '@angular/core';
-import { AngularFireAuth } from '@angular/fire/auth';
-import { AngularFirestore, AngularFirestoreDocument } from '@angular/fire/firestore';
+import {
+  Auth,
+  authState,
+  createUserWithEmailAndPassword,
+  getAdditionalUserInfo,
+  getAuth,
+  GoogleAuthProvider,
+  OAuthProvider,
+  onAuthStateChanged,
+  sendEmailVerification,
+  signInWithPopup,
+  signOut,
+  updateProfile,
+  user,
+} from '@angular/fire/auth';
 import { Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
-import firebase from 'firebase/app';
 import { User } from '@shared/models/user';
 import { switchMap } from 'rxjs/operators';
+import { NotificationService } from '@shared/services/notification.service';
+import { NotificationType } from '@shared/models/notification-type';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  user$: Observable<User | null> = of(null);
   constructor(
-    private afAuth: AngularFireAuth,
-    private afs: AngularFirestore,
-    private router: Router
-  ) {}
+    private auth: Auth,
+    private router: Router,
+    private notificationService: NotificationService
+  ) {
+    this.user$ = new Observable((observer: any) => onAuthStateChanged(auth, observer));
+  }
 
-  getUser(): Observable<User | undefined> {
-    return this.afAuth.authState.pipe(
-      switchMap((user) => {
-        if (user) {
-          return this.afs.doc<User>(`users/${user.uid}`).valueChanges();
-        } else {
-          return of(undefined);
-        }
+  getUser(): Observable<User | null> {
+    return this.user$;
+  }
+
+  async googleLogin() {
+    const provider = new GoogleAuthProvider();
+    this.oAuthLogin(provider);
+  }
+
+  private async oAuthLogin(p: any) {
+    // get provider, sign in
+    const provider = new OAuthProvider(p);
+    const credential = await signInWithPopup(this.auth, provider);
+    const additionalInfo = getAdditionalUserInfo(credential);
+
+    // create user in db
+    if (additionalInfo?.isNewUser) {
+      this.notificationService.notify(
+        NotificationType.SUCCESS,
+        'Danke das du dich registriert hast'
+      );
+    } else {
+      this.notificationService.notify(
+        NotificationType.SUCCESS,
+        'Willkommen zurück, ' + additionalInfo?.profile
+      );
+    }
+  }
+  signOutUser(): void {
+    const auth = getAuth();
+    signOut(auth)
+      .then(() => {
+        this.notificationService.notify(
+          NotificationType.SUCCESS,
+          'Du wurdest erfolgreich ausgeloggt'
+        );
       })
-    );
-  }
-
-  googleLogin() {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    return this.oAuthLogin(provider);
-  }
-
-  private oAuthLogin(provider: any) {
-    return this.afAuth.signInWithPopup(provider).then((credential) => {
-      if (credential.user) {
-        this.updateUserData(credential.user);
-      }
-    });
-  }
-
-  private updateUserData(user: firebase.User) {
-    // Sets user data to firestore on login
-    const userRef: AngularFirestoreDocument<any> = this.afs.doc(`users/${user.uid}`);
-
-    const data: User = {
-      uid: user.uid,
-      email: user.email || 'unknown',
-      displayName: user.displayName || 'unknown',
-      photoURL: user.photoURL || 'unknown',
-    };
-    return userRef.set(data, { merge: true });
-  }
-
-  signOut() {
-    this.afAuth.signOut().then(() => {
-      this.router.navigate(['/']);
-    });
-  }
-
-  get currentUserObservable(): any {
-    return this.afAuth;
+      .catch((error) => {
+        this.notificationService.notify(
+          NotificationType.ERROR,
+          'Oops, du konntest leider nicht ausgeloggt werden'
+        );
+      });
   }
 }

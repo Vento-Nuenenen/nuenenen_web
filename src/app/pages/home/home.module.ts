@@ -2,9 +2,6 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 
-import { AngularFireAuthModule } from '@angular/fire/auth';
-import { AngularFirestoreModule } from '@angular/fire/firestore';
-
 import { ArticleCardComponent } from './components/article-card/article-card.component';
 import { NewArticleComponent } from './components/new-article/new-article.component';
 import { HomeComponent } from './home.component';
@@ -35,8 +32,6 @@ import { ArticleDetailComponent } from './components/article-detail/article-deta
     MaterialModule,
     NgxPageScrollCoreModule.forRoot({ duration: 500 }),
     EditorModule,
-    AngularFireAuthModule,
-    AngularFirestoreModule,
     SharedModule,
     HomeRoutingModule,
   ],

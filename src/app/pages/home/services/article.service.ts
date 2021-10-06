@@ -1,33 +1,44 @@
 import { Injectable, EventEmitter } from '@angular/core';
 
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 
-import { AngularFirestore, AngularFirestoreCollection } from '@angular/fire/firestore';
+import {
+  collection,
+  collectionData,
+  CollectionReference,
+  doc,
+  docData,
+  docSnapshots,
+  Firestore,
+  query,
+  where,
+} from '@angular/fire/firestore';
 import { NotificationService } from '@shared/services/notification.service';
 import { NotificationType } from '@shared/models/notification-type';
 import { Article } from '../models/article';
-import { first } from 'rxjs/operators';
+import { addDoc, getDoc } from '@firebase/firestore';
 
 @Injectable({ providedIn: 'root' })
 export class ArticleService {
-  private articleCollection: AngularFirestoreCollection<Article>;
-  articlesChanged = new EventEmitter<Article[]>();
-
-  constructor(private afs: AngularFirestore, private notificationService: NotificationService) {
-    this.articleCollection = afs.collection<Article>('articles');
-  }
+  constructor(private afs: Firestore, private notificationService: NotificationService) {}
 
   getArticles(): Observable<Article[]> {
-    return this.afs.collection<Article>('articles').valueChanges({ idField: 'id' });
+    return collectionData<Article>(
+      query<Article>(
+        collection(this.afs, 'articles') as CollectionReference<Article>,
+        where('published', '==', true)
+      ),
+      { idField: 'id' }
+    );
   }
 
-  getArticle(id: string): Observable<Article | undefined> {
-    return this.afs.doc<Article>(`articles/${id}`).valueChanges({ idField: 'id' }).pipe(first());
+  async getArticle(id: string): Promise<Article> {
+    const docRef = doc(this.afs, 'articles', id);
+    return (await getDoc(docRef)).data() as Article;
   }
 
   createArticle(article: Article) {
-    this.articleCollection
-      .add(article)
+    addDoc(collection(this.afs, 'articles'), article)
       .then(() =>
         this.notificationService.notify(
           NotificationType.SUCCESS,

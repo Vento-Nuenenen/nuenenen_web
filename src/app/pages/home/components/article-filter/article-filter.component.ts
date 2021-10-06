@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { Tag } from '@pages/home/models/tag';
 import { MatChipInputEvent } from '@angular/material/chips';
 import { map } from 'rxjs/operators';
 import { ArticleService } from '../../services/article.service';
 import { TagService } from '@pages/home/services/tag.service';
 import { Observable, of } from 'rxjs';
+import { Article } from '@pages/home/models/article';
 
 @Component({
   selector: 'app-article-filter',
@@ -12,6 +13,7 @@ import { Observable, of } from 'rxjs';
   styleUrls: ['./article-filter.component.scss'],
 })
 export class ArticleFilterComponent implements OnInit {
+  @Output() changedArticles = new EventEmitter<Article[]>();
   tags: Tag[] = [];
   searchKeyWords: string[] = [];
   visible = true;
@@ -75,8 +77,8 @@ export class ArticleFilterComponent implements OnInit {
           return filteredArticles;
         })
       )
-      .subscribe((articles) => {
-        this.articleService.articlesChanged.emit(articles);
+      .subscribe((articles: Article[]) => {
+        this.changedArticles.emit(articles);
       });
   }
 }
