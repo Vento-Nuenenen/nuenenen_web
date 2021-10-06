@@ -1,0 +1,14 @@
+.abteilungs-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  margin: auto;
+}
+.abteilung-image {
+  margin: auto;
+  max-width: min(100%, 500px);
+}
+.abteilung-footer {
+  display: flex;
+  justify-content: space-between;
+}

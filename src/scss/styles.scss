@@ -3,7 +3,7 @@
 
 .nuenenen-container {
   // header has hight of 75px
-  padding-top: calc(75px + 1rem);
+  padding-top: 75px;
 }
 // Make material buttons round
 button {
@@ -30,6 +30,7 @@ button:focus {
 h1 {
   font-weight: 700;
 }
+// set max with for p to 75 words
 p {
   overflow: hidden;
   max-width: 75ch;

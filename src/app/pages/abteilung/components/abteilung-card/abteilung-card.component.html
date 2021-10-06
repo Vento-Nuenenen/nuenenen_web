@@ -1,0 +1,13 @@
+<mat-card class="abteilungs-card">
+  <img
+    class="abteilung-image"
+    [src]="'../../../../../assets/images/' + imagePath + '.svg'"
+    [alt]="title"
+  />
+  <div class="abteilung-footer">
+    <h2>{{ title }}</h2>
+    <button mat-icon-button color="primary" [routerLink]="link">
+      <mat-icon>arrow_forward</mat-icon>
+    </button>
+  </div>
+</mat-card>
