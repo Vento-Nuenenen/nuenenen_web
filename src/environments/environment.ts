@@ -12,8 +12,8 @@ export const environment = {
     storageBucket: 'pfadi-nuenenen-dev.appspot.com',
     messagingSenderId: '322706514551',
     appId: '1:322706514551:web:357500b1767d5868ae1c72',
-    measurementId: 'G-5LDBT48Y9G'
-  }
+    measurementId: 'G-5LDBT48Y9G',
+  },
 };
 
 /*
